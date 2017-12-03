@@ -37,9 +37,35 @@ puzzle_input = """1364	461	1438	1456	818	999	105	1065	314	99	1353	148	837	590	40
 378	171	155	1100	184	937	792	1436	1734	179	1611	1349	647	1778	1723	1709
 4463	4757	201	186	3812	2413	2085	4685	5294	5755	2898	200	5536	5226	1028	180"""
 
+# sum of differences between max and min of each row
 answer = 0
 for row in puzzle_input.split("\n"):
     numbers = [int(number) for number in row.split("\t")]
     answer += max(numbers) - min(numbers)
+
+print(answer)
+
+# sum of evenly divisible numbers of each row
+# assumption: there is only one pair that satisfies this condition on each row
+answer = 0
+
+
+def find_pair(numbers):
+    # for each value, we will compare it with the remainder of the list of numbers
+    for i, value_i in enumerate(numbers):
+        for j, value_j in enumerate(numbers[i + 1:]):
+            # Depending on the value, we want to select the correct dividend / divisor
+            dividend = max(value_i, value_j)
+            divisor = min(value_i, value_j)
+            resultant = float(dividend) / float(divisor)
+
+            # if there is no remainder
+            if resultant % 1 == 0.0:
+                return dividend, divisor
+
+for row in puzzle_input.split("\n"):
+    numbers = [int(number) for number in row.split("\t")]
+    dividend, divisor = find_pair(numbers)
+    answer += dividend / divisor
 
 print(answer)
