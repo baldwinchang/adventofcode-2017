@@ -31,9 +31,7 @@ def layer_of(n):
         return 0
 
     layer = 1
-    square = 3
-    while square**2 < n:
-        square += 2
+    while ((2 * layer) + 1)**2 < n:
         layer += 1
     return layer
 
