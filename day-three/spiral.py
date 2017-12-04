@@ -68,7 +68,7 @@ assert layer_corners(2) == [13, 17, 21, 25]
 
 def layer_cross(layer):
     corners = layer_corners(layer)
-    step = (corners[1] - corners[0]) / 2
+    step = int((corners[1] - corners[0]) / 2)
     return [corner - step for corner in corners]
 
 assert layer_cross(1) == [2, 4, 6, 8]
@@ -105,3 +105,126 @@ assert steps_to_center(23) == 2
 assert steps_to_center(1024) == 31
 
 print(steps_to_center(puzzle_input))
+
+"""
+--- Part Two ---
+
+As a stress test on the system, the programs here clear the grid and then store the value 1 in square 1. Then, in the same allocation order as shown above, they store the sum of the values in all adjacent squares, including diagonals.
+
+So, the first few squares' values are chosen as follows:
+
+Square 1 starts with the value 1.
+Square 2 has only one adjacent filled square (with value 1), so it also stores 1.
+Square 3 has both of the above squares as neighbors and stores the sum of their values, 2.
+Square 4 has all three of the aforementioned squares as neighbors and stores the sum of their values, 4.
+Square 5 only has the first and fourth squares as neighbors, so it gets the value 5.
+Once a square is written, its value does not change. Therefore, the first few squares would receive the following values:
+
+147  142  133  122   59
+304    5    4    2   57
+330   10    1    1   54
+351   11   23   25   26
+362  747  806--->   ...
+What is the first value written that is larger than your puzzle input?
+"""
+
+# We can utilize the previous written code as indices
+# for this part of the puzzle.
+
+# It looks like only indices that have been calculated so far are considered
+#
+# Reader note:
+# This is a naive solution... but I am proud that I have deduced this far.
+
+
+def layer_sides(layer):
+    if layer == 0:
+        return [[1], [1], [1], [1]]
+
+    side_length = (2 * layer) - 1
+    values = layer_values(layer)
+    corners = layer_corners(layer)
+
+    sides = list()
+    for i in range(4):
+        side = list()
+        side.append(corners[(i - 1) % len(corners)])
+        side.extend(values[i*side_length + i:(i+1)*side_length + i])
+        side.append(corners[i % len(corners)])
+
+        sides.append(side)
+    return sides
+
+
+def adjacent_indices(index):
+    if index == 1:
+        return [1]
+
+    # We care about the immediately adjacent squares
+    indices = set()
+
+    # Some important landmarks
+    current_layer = layer_of(index)
+    previous_layer = current_layer - 1
+
+    # Layer values
+    current_layer_values = layer_values(current_layer)
+
+    # Layer sides
+    current_layer_sides = layer_sides(current_layer)
+    # no_corners match the previous side lengths
+    current_layer_sides_no_corners = [current_layer_sides[i][1:-1] for i in range(len(current_layer_sides))]
+    previous_layer_sides = layer_sides(previous_layer)
+
+    # Layer Corners
+    current_layer_corners = layer_corners(current_layer)
+    previous_layer_corners = layer_corners(previous_layer)
+
+    # Simple adjacent indices
+    indices.add(index - 1)
+
+    # If I am at the end of my current layer, I will wrap around
+    # to the first value of my layer
+    if current_layer_values[-1] == index:
+        indices.add(current_layer_values[0])
+
+    # If I am close to a corner (distance of one, I want to consider the index immediately prior)
+    for corner in current_layer_corners:
+        if abs(index - corner) == 1:
+            previous_value = current_layer_values[(current_layer_values.index(corner) - 1) % len(current_layer_values)]
+            if previous_value < index:
+                indices.add(previous_value)
+            next_value = current_layer_values[(current_layer_values.index(corner) + 1) % len(current_layer_values)]
+            if next_value < index:
+                indices.add(next_value)
+
+    # If I am a corner, I have special rules
+    # previous corner is my adjacent
+    if index in current_layer_corners:
+        indices.add(previous_layer_corners[current_layer_corners.index(index)])
+    else:
+        # Depending on the side I am in
+        # 0 = right, 1 = top, 2 = left, 3 = bottom
+        # These are based on the convention declared in layer_sides_no_corners
+        for i in range(4):
+            if index in current_layer_sides[i]:
+                previous_layer_index = current_layer_sides_no_corners[i].index(index)
+                previous_layer_side = previous_layer_sides[i]
+                # add immediate previous layer
+                indices.add(previous_layer_side[previous_layer_index])
+                # next, up to a wall
+                indices.add(previous_layer_side[min(previous_layer_index + 1, len(previous_layer_side) - 1)])
+                # previous, up to a wall
+                indices.add(previous_layer_side[max(previous_layer_index - 1, 0)])
+    return indices
+
+
+puzzle_map = dict()
+puzzle_map[1] = 1
+i = 1
+while puzzle_map[i] < puzzle_input:
+    i += 1
+    puzzle_map[i] = sum(puzzle_map[a] for a in adjacent_indices(i))
+    print(i,  adjacent_indices(i), puzzle_map[i])
+
+print(puzzle_map[i])
