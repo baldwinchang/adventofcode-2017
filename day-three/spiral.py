@@ -223,6 +223,6 @@ i = 1
 while puzzle_map[i] < puzzle_input:
     i += 1
     puzzle_map[i] = sum(puzzle_map[a] for a in adjacent_indices(i))
-    print(i,  adjacent_indices(i), puzzle_map[i])
+    #print(i,  adjacent_indices(i), puzzle_map[i])
 
 print(puzzle_map[i])

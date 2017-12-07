@@ -66,6 +66,6 @@ def find_pair(numbers):
 for row in puzzle_input.split("\n"):
     numbers = [int(number) for number in row.split("\t")]
     dividend, divisor = find_pair(numbers)
-    answer += dividend / divisor
+    answer += dividend // divisor
 
 print(answer)

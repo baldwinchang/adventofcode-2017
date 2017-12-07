@@ -42,7 +42,7 @@ print(answer)
 answer = 0
 for idx, char in enumerate(puzzle_input):
     # wrap around
-    next_char = puzzle_input[(idx + (len(puzzle_input) / 2)) % len(puzzle_input)]
+    next_char = puzzle_input[(idx + (len(puzzle_input) // 2)) % len(puzzle_input)]
 
     if char == next_char:
         answer += int(char)

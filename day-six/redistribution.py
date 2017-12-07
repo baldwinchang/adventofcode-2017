@@ -28,8 +28,10 @@ with open('puzzle_input.txt') as f:
 # Initialize the memory bank
 memory_bank = [int(puzzle_input[i]) for i in range(len(puzzle_input))]
 
+
 def maximum_index(bank):
     return bank.index(max(bank))
+
 
 def redistribute_index(index, bank):
     value_to_distribute = bank[index]
